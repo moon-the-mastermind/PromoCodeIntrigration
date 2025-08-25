@@ -2,7 +2,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 
-PROMO_CODES = {"ostad10": 0.10, "ostad5": 0.05}
+PROMO_CODES = {"ostad10": 0.10, "ostad5": 0.05, "moon" : 50, "moonthemastermind" : 100 }
 
 def checkout(request):
     cart_total = request.session.get('cart_total', 100)
