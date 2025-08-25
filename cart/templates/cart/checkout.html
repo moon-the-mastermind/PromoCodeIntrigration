@@ -1,0 +1,68 @@
+<!-- templates/cart/checkout.html -->
+{% extends "cart/base.html" %}
+{% load static %}
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-6 rounded shadow">
+    <h2 class="text-xl font-bold mb-4">Checkout</h2>
+
+    <!-- Promo Code Section -->
+    <div id="promo-section" class="mb-4">
+        <label class="block mb-2 font-medium">Promo Code:</label>
+        <div class="flex gap-2">
+            <input type="text" id="promo-code" placeholder="Enter promo code"
+                   class="border border-gray-300 p-2 rounded flex-grow">
+            <button onclick="applyPromo()"
+                    class="bg-red-700 text-white px-4 py-2 rounded hover:bg-red-800">Apply</button>
+        </div>
+        <p id="promo-message" class="mt-2 text-sm text-red-600"></p>
+    </div>
+
+    <!-- Cart Summary -->
+    <div id="cart-summary" class="mt-6 border-t border-gray-200 pt-4">
+        <p class="flex justify-between">
+            <span>Subtotal:</span>
+            <span>$<span id="subtotal">{{ cart_total }}</span></span>
+        </p>
+        <p class="flex justify-between">
+            <span>Discount:</span>
+            <span>$<span id="discount">{{ discount }}</span></span>
+        </p>
+        <p class="flex justify-between font-bold text-lg mt-2">
+            <span>Total:</span>
+            <span>$<span id="total">{{ final_total }}</span></span>
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+async function applyPromo() {
+    const code = document.getElementById('promo-code').value;
+    const response = await fetch("{% url 'apply_promo' %}", {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ code })
+    });
+    const data = await response.json();
+
+    const messageEl = document.getElementById('promo-message');
+    if (data.error) {
+        messageEl.textContent = data.error;
+        messageEl.classList.add('text-red-600');
+        messageEl.classList.remove('text-green-600');
+    } else if(data.discount !== undefined) {
+        document.getElementById('discount').textContent = data.discount.toFixed(2);
+        document.getElementById('total').textContent = data.final_total.toFixed(2);
+        messageEl.textContent = "Promo code applied successfully!";
+        messageEl.classList.add('text-green-600');
+        messageEl.classList.remove('text-red-600');
+    }
+}
+</script>
+{% endblock %}
